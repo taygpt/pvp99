@@ -4,6 +4,8 @@
 #include <Windows.h>
 #include <glfw/glfw3.h>
 
+#include "gfx/renderer/rndrr.h"
+
 class game
 {
 public:
@@ -14,7 +16,7 @@ private:
 	void init();
 	void run();
 
-	void update();
+	void update(float dt);
 	void render();
 
 	GLFWwindow* window;
@@ -22,5 +24,7 @@ private:
 	uint16_t screen_width;
 	uint16_t screen_height;
 
+	double last_frame_time;
+	float dt;
 };
 #endif // GAME_H
