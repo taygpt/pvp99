@@ -22,7 +22,6 @@ void game::init()
 		exit(-1);
 	}
 
-	//help
 
 	glfwSetWindowAttrib(window, GLFW_RESIZABLE, GLFW_FALSE);
 
