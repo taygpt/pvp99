@@ -18,19 +18,10 @@
     <ClInclude Include="src\globals\globals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game.h">
+    <ClInclude Include="src\gfx\window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\gfx\gl\glad.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gfx\gl\khrplatform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gfx\renderer\rndrr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gfx\renderer\gl_texture.h">
+    <ClInclude Include="src\gfx\renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -38,17 +29,14 @@
     <ClCompile Include="src\globals\globals.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game.cpp">
+    <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gfx\gl\glad.cpp">
+    <ClCompile Include="src\window\pvp99window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gfx\renderer\rndrr.cpp">
+    <ClCompile Include="src\gfx\renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
 </Project>

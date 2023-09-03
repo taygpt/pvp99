@@ -106,8 +106,9 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;dxguid.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -127,32 +128,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\game.h" />
-    <ClInclude Include="src\gfx\gl\khrplatform.h" />
-    <ClInclude Include="src\gfx\renderer\gl_texture.h" />
-    <ClInclude Include="src\gfx\renderer\rndrr.h" />
+    <ClInclude Include="src\gfx\renderer.h" />
+    <ClInclude Include="src\gfx\window.h" />
     <ClInclude Include="src\globals\globals.h" />
-    <ClInclude Include="src\gfx\gl\glad.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\game.cpp" />
-    <ClCompile Include="src\gfx\gl\glad.cpp" />
-    <ClCompile Include="src\gfx\renderer\rndrr.cpp" />
+    <ClCompile Include="src\gfx\renderer.cpp" />
+    <ClCompile Include="src\window\pvp99window.cpp" />
     <ClCompile Include="src\globals\globals.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="packages\glfw.3.3.8\build\native\glfw.targets" Condition="Exists('packages\glfw.3.3.8\build\native\glfw.targets')" />
-    <Import Project="packages\LodePNG.1.2.0\build\native\lodepng.targets" Condition="Exists('packages\LodePNG.1.2.0\build\native\lodepng.targets')" />
-  </ImportGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('packages\glfw.3.3.8\build\native\glfw.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\glfw.3.3.8\build\native\glfw.targets'))" />
-    <Error Condition="!Exists('packages\LodePNG.1.2.0\build\native\lodepng.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\LodePNG.1.2.0\build\native\lodepng.targets'))" />
-  </Target>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>
