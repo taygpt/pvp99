@@ -81,7 +81,86 @@ void renderer::init(HWND hwnd, HINSTANCE hInstance)
 	viewport.TopLeftX = 0.0f;
 	viewport.TopLeftY = 0.0f;
 
+
 	d3d_context->RSSetViewports(1, &viewport);
+
+	Vertex vertices[] = 
+	{
+		{0.0f, 0.5f, 0.0f},   // Vertex 1
+		{0.5f, -0.5f, 0.0f},  // Vertex 2
+		{-0.5f, -0.5f, 0.0f}  // Vertex 3
+	};
+
+	D3D11_BUFFER_DESC buffer_desc;
+	buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+	buffer_desc.ByteWidth = sizeof(vertices);
+	buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	buffer_desc.CPUAccessFlags = 0;
+	buffer_desc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA init_data;
+	init_data.pSysMem = vertices;
+
+	d3d_device->CreateBuffer(&buffer_desc, &init_data, &vertex_buffer);
+
+	// Bind the vertex buffer
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	d3d_context->IASetVertexBuffers(0, 1, &vertex_buffer, &stride, &offset);
+
+	result = S_OK;
+	ID3DBlob* vertexShaderBlob = nullptr;
+	ID3DBlob* pixelShaderBlob = nullptr;
+
+	result = D3DCompileFromFile(L"src/gfx/shaders/vertex_shader.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &vertexShaderBlob, nullptr);
+	if (FAILED(result))
+	{
+		MessageBox(nullptr, L"Failed to compile the vertex shader", L"Error", MB_OK);
+		return;
+	}
+
+	result = D3DCompileFromFile(L"src/gfx/shaders/pixel_shader.hlsl", nullptr, nullptr, "main", "ps_5_0", 0, 0, &pixelShaderBlob, nullptr);
+	if (FAILED(result))
+	{
+		MessageBox(nullptr, L"Failed to compile the pixel shader", L"Error", MB_OK);
+		return;
+	}
+
+	result = d3d_device->CreateVertexShader(vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), nullptr, &vertex_shader);
+	if (FAILED(result))
+	{
+		MessageBox(nullptr, L"Failed to create the vertex shader", L"Error", MB_OK);
+		return;
+	}
+
+	result = d3d_device->CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &pixel_shader);
+	if (FAILED(result))
+	{
+		MessageBox(nullptr, L"Failed to create the pixel shader", L"Error", MB_OK);
+		return;
+	}
+
+	// Input layout (assuming a simple vertex format with POSITION)
+	D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+
+	result = d3d_device->CreateInputLayout(layoutDesc, 1, vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &input_layout);
+	if (FAILED(result))
+	{
+		MessageBox(nullptr, L"Failed to create the input layout", L"Error", MB_OK);
+		return;
+	}
+
+	// Set shaders and input layout
+	d3d_context->VSSetShader(vertex_shader, nullptr, 0);
+	d3d_context->PSSetShader(pixel_shader, nullptr, 0);
+	d3d_context->IASetInputLayout(input_layout);
+
+	// Release the shader blobs
+	if (vertexShaderBlob) vertexShaderBlob->Release();
+	if (pixelShaderBlob) pixelShaderBlob->Release();
 }
 
 void renderer::update(float dt)
@@ -92,6 +171,9 @@ void renderer::render()
 {
 	float color[4] = { 0.01f, 0.02f, 0.08f, 1.0f };
 	d3d_context->ClearRenderTargetView(backbuffer_target, color);
+
+	d3d_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	d3d_context->Draw(3, 0);
 	swap_chain->Present(0, 0);
 }
 
@@ -121,6 +203,8 @@ void renderer::release()
 	{
 		d3d_device->Release();
 	}
+
+
 
 	d3d_device = nullptr;
 	d3d_context = nullptr;

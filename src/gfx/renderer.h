@@ -1,7 +1,8 @@
-#ifndef GFX_H
-#define GFX_H
+#ifndef RENDERER_H
+#define RENDERER_H
 
 #include <d3d11.h>
+#include <d3dcompiler.h>
 #include <cstdint>
 
 class renderer
@@ -30,9 +31,20 @@ private:
 	IDXGISwapChain* swap_chain;
 	ID3D11RenderTargetView* backbuffer_target;
 
+	ID3D11VertexShader* vertex_shader;
+	ID3D11PixelShader* pixel_shader;
+	ID3D11InputLayout* input_layout;
+
+	ID3D11Buffer* vertex_buffer;
+
 	uint16_t screen_width;
 	uint16_t screen_height;
 	float dt;
 };
 
-#endif // GFX_H
+struct Vertex
+{
+	float x, y, z;
+};
+
+#endif // RENDERER_H
