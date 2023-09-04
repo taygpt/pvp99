@@ -86,9 +86,13 @@ void renderer::init(HWND hwnd, HINSTANCE hInstance)
 
 	Vertex vertices[] = 
 	{
-		{0.0f, 0.5f, 0.0f},   // Vertex 1
-		{0.5f, -0.5f, 0.0f},  // Vertex 2
-		{-0.5f, -0.5f, 0.0f}  // Vertex 3
+		{-0.5f, -0.5f, 0.0f},  // Vertex 1
+		{-0.5f, 0.5f, 0.0f},   // Vertex 2
+		{0.5f, 0.5f, 0.0f},    // Vertex 3
+
+		{0.5f, 0.5f, 0.0f}, 
+		{0.5f, -0.5f, 0.0f},
+		{-0.5f, -0.5f, 0.0f}
 	};
 
 	D3D11_BUFFER_DESC buffer_desc;
@@ -98,42 +102,38 @@ void renderer::init(HWND hwnd, HINSTANCE hInstance)
 	buffer_desc.CPUAccessFlags = 0;
 	buffer_desc.MiscFlags = 0;
 
-	D3D11_SUBRESOURCE_DATA init_data;
-	init_data.pSysMem = vertices;
+	D3D11_SUBRESOURCE_DATA resource_data;
+	resource_data.pSysMem = vertices;
 
-	d3d_device->CreateBuffer(&buffer_desc, &init_data, &vertex_buffer);
+	d3d_device->CreateBuffer(&buffer_desc, &resource_data, &vertex_buffer);
 
-	// Bind the vertex buffer
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
-	d3d_context->IASetVertexBuffers(0, 1, &vertex_buffer, &stride, &offset);
 
-	result = S_OK;
-	ID3DBlob* vertexShaderBlob = nullptr;
-	ID3DBlob* pixelShaderBlob = nullptr;
 
-	result = D3DCompileFromFile(L"src/gfx/shaders/vertex_shader.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &vertexShaderBlob, nullptr);
+	ID3DBlob* vertex_shader_blob = nullptr;
+	ID3DBlob* pixel_shader_blob = nullptr;
+
+	result = D3DCompileFromFile(L"src/gfx/shaders/vertex_shader.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &vertex_shader_blob, nullptr);
 	if (FAILED(result))
 	{
 		MessageBox(nullptr, L"Failed to compile the vertex shader", L"Error", MB_OK);
 		return;
 	}
 
-	result = D3DCompileFromFile(L"src/gfx/shaders/pixel_shader.hlsl", nullptr, nullptr, "main", "ps_5_0", 0, 0, &pixelShaderBlob, nullptr);
+	result = D3DCompileFromFile(L"src/gfx/shaders/pixel_shader.hlsl", nullptr, nullptr, "main", "ps_5_0", 0, 0, &pixel_shader_blob, nullptr);
 	if (FAILED(result))
 	{
 		MessageBox(nullptr, L"Failed to compile the pixel shader", L"Error", MB_OK);
 		return;
 	}
 
-	result = d3d_device->CreateVertexShader(vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), nullptr, &vertex_shader);
+	result = d3d_device->CreateVertexShader(vertex_shader_blob->GetBufferPointer(), vertex_shader_blob->GetBufferSize(), nullptr, &vertex_shader);
 	if (FAILED(result))
 	{
 		MessageBox(nullptr, L"Failed to create the vertex shader", L"Error", MB_OK);
 		return;
 	}
 
-	result = d3d_device->CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &pixel_shader);
+	result = d3d_device->CreatePixelShader(pixel_shader_blob->GetBufferPointer(), pixel_shader_blob->GetBufferSize(), nullptr, &pixel_shader);
 	if (FAILED(result))
 	{
 		MessageBox(nullptr, L"Failed to create the pixel shader", L"Error", MB_OK);
@@ -141,26 +141,22 @@ void renderer::init(HWND hwnd, HINSTANCE hInstance)
 	}
 
 	// Input layout (assuming a simple vertex format with POSITION)
-	D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
+	D3D11_INPUT_ELEMENT_DESC layout_desc[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	result = d3d_device->CreateInputLayout(layoutDesc, 1, vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), &input_layout);
+	result = d3d_device->CreateInputLayout(layout_desc, 1, vertex_shader_blob->GetBufferPointer(), vertex_shader_blob->GetBufferSize(), &input_layout);
 	if (FAILED(result))
 	{
 		MessageBox(nullptr, L"Failed to create the input layout", L"Error", MB_OK);
 		return;
 	}
 
-	// Set shaders and input layout
-	d3d_context->VSSetShader(vertex_shader, nullptr, 0);
-	d3d_context->PSSetShader(pixel_shader, nullptr, 0);
-	d3d_context->IASetInputLayout(input_layout);
 
 	// Release the shader blobs
-	if (vertexShaderBlob) vertexShaderBlob->Release();
-	if (pixelShaderBlob) pixelShaderBlob->Release();
+	if (vertex_shader_blob) vertex_shader_blob->Release();
+	if (pixel_shader_blob) pixel_shader_blob->Release();
 }
 
 void renderer::update(float dt)
@@ -172,8 +168,17 @@ void renderer::render()
 	float color[4] = { 0.01f, 0.02f, 0.08f, 1.0f };
 	d3d_context->ClearRenderTargetView(backbuffer_target, color);
 
+	// Bind the vertex buffer
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+
+	d3d_context->IASetVertexBuffers(0, 1, &vertex_buffer, &stride, &offset);
+	d3d_context->IASetInputLayout(input_layout);
 	d3d_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	d3d_context->Draw(3, 0);
+	d3d_context->VSSetShader(vertex_shader, nullptr, 0);
+	d3d_context->PSSetShader(pixel_shader, nullptr, 0);
+	d3d_context->Draw(6, 0);
+
 	swap_chain->Present(0, 0);
 }
 
